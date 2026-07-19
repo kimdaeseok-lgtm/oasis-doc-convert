@@ -1,0 +1,18 @@
+{
+  "name": "oasis-doc-convert",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OASIS 자료실 문서변환 서비스 — HWP/HWPX 등을 마크다운으로 (Kordoc)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.1.6",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "kordoc": "^3.1.1"
+  }
+}
