@@ -1,5 +1,3 @@
-import { parse } from "kordoc";
-
 // Node 런타임 필수(kordoc은 Buffer 등 Node API 사용). Edge에서는 동작 안 함.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,7 +10,7 @@ function json(obj, status = 200) {
   });
 }
 
-// 상태 확인용: 브라우저로 열면 동작 여부만 알려줌 (문서는 변환하지 않음)
+// 상태 확인용: 브라우저로 열면 동작 여부만 알려줌 (kordoc은 불러오지 않음)
 export async function GET() {
   return json({ ok: true, service: "oasis-doc-convert", ready: !!process.env.CONVERT_SECRET });
 }
@@ -36,7 +34,15 @@ export async function POST(req) {
   catch (e) { return json({ ok: false, error: "bad base64" }, 400); }
   if (!bytes.length) return json({ ok: false, error: "empty file" }, 400);
 
-  // 4) Kordoc으로 마크다운 변환 (HWP·HWPX·HWPML·DOCX·XLSX 등)
+  // 4) kordoc은 여기서만(변환 시점에) 불러온다 — 콜드스타트 크래시 방지 + 오류를 JSON으로 반환
+  let parse;
+  try {
+    ({ parse } = await import("kordoc"));
+  } catch (e) {
+    return json({ ok: false, error: "kordoc load failed: " + String((e && e.message) || e) }, 500);
+  }
+
+  // 5) 마크다운 변환 (HWP·HWPX·HWPML·DOCX·XLSX 등)
   try {
     const result = await parse(bytes.buffer);
     if (!result || !result.success) {
