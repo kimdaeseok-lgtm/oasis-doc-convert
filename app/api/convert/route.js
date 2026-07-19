@@ -10,9 +10,16 @@ function json(obj, status = 200) {
   });
 }
 
-// 상태 확인용: 브라우저로 열면 동작 여부만 알려줌 (kordoc은 불러오지 않음)
+// 상태 확인용: 브라우저로 열면 동작 여부 + kordoc 로딩 결과를 알려줌(진단용)
 export async function GET() {
-  return json({ ok: true, service: "oasis-doc-convert", ready: !!process.env.CONVERT_SECRET });
+  let kordoc = "unknown";
+  try {
+    const m = await import("kordoc");
+    kordoc = (m && typeof m.parse === "function") ? "ok" : "loaded-but-no-parse";
+  } catch (e) {
+    kordoc = "FAIL: " + String((e && e.message) || e);
+  }
+  return json({ ok: true, service: "oasis-doc-convert", ready: !!process.env.CONVERT_SECRET, kordoc });
 }
 
 export async function POST(req) {
